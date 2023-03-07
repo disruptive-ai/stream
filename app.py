@@ -10,16 +10,34 @@ st.header("OpenAI Chat API")
 input_key = "my_input" # Define a unique key for the text input
 input_value = "" # Define a placeholder value for the input
 
-# Define a function to execute when the button is clicked
-def on_button_click():
+# Define a function to execute when the Enter key is pressed
+def on_enter_pressed():
     # Get the current value of the text input
     input_value = st.session_state[input_key]
 
+    # Do something with the input value
+    st.write("You entered:", input_value)
+
+# ADD SOME COLUMNS
+col1, col2 = st.columns([3, 1])
+with col1:
+   user_input = st.text_input("Prompt", placeholder="Ask anything and press Enter", key=input_key, on_change=on_enter_pressed)
+
+# Create the text output box
+res_box = st.empty()
+
+# Store the current value of the text input in session state
+if input_key not in st.session_state:
+    st.session_state[input_key] = input_value
+else:
+    input_value = st.session_state[input_key]
+
+def on_button_click():
     # a ChatCompletion request
     response = openai.ChatCompletion.create(
         model='gpt-3.5-turbo',
         messages=[
-            {'role': 'user', 'content': input_value}
+            {'role': 'user', 'content': user_input}
         ],
         stream=True  # streamed
     )
@@ -37,22 +55,16 @@ def on_button_click():
         # print(stream_content) # use for troubleshooting
         stream_content = stream_content.strip()  # remove leading/trailing whitespace
         res_box.markdown(stream_content)
-
-# Create the text input box
-user_input = st.text_input("Prompt", placeholder="Ask anything and press Enter", key=input_key)
-
-# Store the current value of the text input in session state
-if input_key not in st.session_state:
-    st.session_state[input_key] = input_value
-else:
-    input_value = st.session_state[input_key]
-
+        
 # Create a button widget and define its behavior when clicked
-button = st.button("Send")
+button = st.button("Send prompt")
 if button:
     on_button_click()
 
-res_box = st.empty()
+
+
+
+
 
 # show in the text box
 # res_box.markdown(f'*{stream_content}*')
