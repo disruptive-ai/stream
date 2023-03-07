@@ -2,13 +2,12 @@ import openai
 import streamlit as st
 from streamlit_pills import pills
 
-openai.api_key = st.secrets['api_secret']
+openai.api_key = st.secrets['OPENAI_KEY']
 
 st.subheader("AI Assistant : Streamlit + OpenAI: `stream` *argument*")
-selected = pills("", ["NO Streaming", "Streaming"], ["🎈", "🌈"])
+selected = pills("", ["NO Streaming", "Streaming"], ["🎈", "⚡"])
 
 user_input = st.text_input("You: ",placeholder = "Ask me anything ...", key="input")
-
 
 if st.button("Submit", type="primary"):
     st.markdown("----")
