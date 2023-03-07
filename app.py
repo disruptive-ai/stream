@@ -18,10 +18,7 @@ def on_enter_pressed():
     # Do something with the input value
     st.write("You entered:", input_value)
 
-# ADD SOME COLUMNS
-col1, col2 = st.columns([3, 1])
-with col1:
-   user_input = st.text_input("Prompt", placeholder="Ask anything and press Enter", key=input_key, on_change=on_enter_pressed)
+user_input = st.text_input("Prompt", placeholder="Ask anything and press Enter", key=input_key, on_change=on_enter_pressed)
 
 # Create the text output box
 res_box = st.empty()
@@ -60,10 +57,6 @@ def on_button_click():
 button = st.button("Send prompt")
 if button:
     on_button_click()
-
-
-
-
 
 
 # show in the text box
