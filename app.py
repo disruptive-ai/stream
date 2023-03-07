@@ -1,39 +1,60 @@
-import openai
 import streamlit as st
-from streamlit_pills import pills
+import openai
 
+# Set up OpenAI API credentials
 openai.api_key = st.secrets['OPENAI_KEY']
 
-st.subheader("AI Assistant : Streamlit + OpenAI: `stream` *argument*")
-selected = pills("", ["NO Streaming", "Streaming"], ["🎈", "⚡"])
+st.header("OpenAI Chat API")
 
-user_input = st.text_input("You: ",placeholder = "Ask me anything ...", key="input")
+### FOR THE ENTER BUTTON
+input_key = "my_input" # Define a unique key for the text input
+input_value = "" # Define a placeholder value for the input
 
-if st.button("Submit", type="primary"):
-    st.markdown("----")
-    res_box = st.empty()
-    if selected == "Streaming":
-        report = []
-        for resp in openai.Completion.create(model='text-davinci-003',
-                                            prompt=user_input,
-                                            max_tokens=120, 
-                                            temperature = 0.5,
-                                            stream = True):
-            # join method to concatenate the elements of the list 
-            # into a single string, 
-            # then strip out any empty strings
-            report.append(resp.choices[0].text)
-            result = "".join(report).strip()
-            result = result.replace("\n", "")        
-            res_box.markdown(f'*{result}*') 
-            
-    else:
-        completions = openai.Completion.create(model='text-davinci-003',
-                                            prompt=user_input,
-                                            max_tokens=120, 
-                                            temperature = 0.5,
-                                            stream = False)
-        result = completions.choices[0].text
-        
-        res_box.write(result)
-st.markdown("----")
+# Define a function to execute when the Enter key is pressed
+def on_enter_pressed():
+    # Get the current value of the text input
+    input_value = st.session_state[input_key]
+
+    # Do something with the input value
+    st.write("You entered:", input_value)
+
+# Create the text input box
+user_input = st.text_input("Prompt", placeholder="Ask anything and press Enter", key=input_key, on_change=on_enter_pressed)
+
+# Store the current value of the text input in session state
+if input_key not in st.session_state:
+    st.session_state[input_key] = input_value
+else:
+    input_value = st.session_state[input_key]
+
+res_box = st.empty()
+
+# a ChatCompletion request
+response = openai.ChatCompletion.create(
+    model='gpt-3.5-turbo',
+    messages=[
+        {'role': 'user', 'content': user_input}
+    ],
+    stream=True  # streamed
+)
+
+# create variables to collect the stream of chunks
+collected_chunks = []
+collected_messages = []
+for chunk in response:
+    collected_chunks.append(chunk)  # save the event response
+    if 'choices' in chunk and chunk['choices']:  # check if 'choices' key exists and is not empty
+        chunk_message = chunk['choices'][0]['delta']  # extract the message
+        if chunk_message:  # check if message is not empty
+            collected_messages.append(chunk_message)  # save the message
+    stream_content = ''.join([s.get('content', '') for s in collected_messages if s])  # add check for empty strings
+    # print(stream_content) # use for troubleshooting
+    stream_content = stream_content.strip()  # remove leading/trailing whitespace
+    res_box.markdown(stream_content)
+
+# show in the text box
+# res_box.markdown(f'*{stream_content}*')
+
+# print the text received
+# full_reply_content = ''.join([m.get('content', '') for m in collected_messages])
+# print(f"Full conversation received: {full_reply_content}")
