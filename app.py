@@ -54,7 +54,7 @@ def on_button_click():
         res_box.markdown(stream_content)
         
 # Create a button widget and define its behavior when clicked
-button = st.button("Send prompt")
+button = st.button("Send prompt", type="primary")
 if button:
     on_button_click()
 
